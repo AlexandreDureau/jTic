@@ -1,9 +1,9 @@
-package common.ticdataset.src;
+package domain.ticdataset;
 
-import common.TicTimestamp;
-import common.exceptions.TicChecksumException;
-import common.exceptions.TicInvalidFormatException;
-import common.ticframe.src.TicFrame;
+import domain.TicTimestamp;
+import domain.exceptions.TicChecksumException;
+import domain.exceptions.TicInvalidFormatException;
+import domain.ticframe.TicFrame;
 import java.time.LocalDateTime;
 
 public abstract class TicDataSet {
@@ -157,6 +157,8 @@ public abstract class TicDataSet {
         }
 
     }
+
+    public abstract byte[] getBytes();
 
     protected abstract void init();
 }

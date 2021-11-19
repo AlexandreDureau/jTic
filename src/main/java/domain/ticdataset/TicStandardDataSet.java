@@ -1,7 +1,4 @@
-package common.ticdataset.src;
-
-import common.exceptions.TicChecksumException;
-import common.exceptions.TicInvalidFormatException;
+package domain.ticdataset;
 
 public class TicStandardDataSet extends TicDataSet{
 
@@ -41,6 +38,11 @@ public class TicStandardDataSet extends TicDataSet{
         else{
             return null;
         }
+    }
+
+    @Override
+    public byte[] getBytes() {
+        return new byte[0];
     }
 
     @Override

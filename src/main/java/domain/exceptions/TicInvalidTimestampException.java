@@ -1,6 +1,6 @@
-package common.exceptions;
+package domain.exceptions;
 
-import static common.TicTimestamp.FORMAT;
+import static domain.TicTimestamp.FORMAT;
 
 public class TicInvalidTimestampException extends Exception{
 
