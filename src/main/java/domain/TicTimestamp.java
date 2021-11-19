@@ -1,6 +1,6 @@
-package common;
+package domain;
 
-import common.exceptions.TicInvalidTimestampException;
+import domain.exceptions.TicInvalidTimestampException;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 
@@ -14,6 +14,7 @@ public class TicTimestamp {
     }
 
     public String get(){
+
         return time;
     }
 

@@ -1,4 +1,4 @@
-package common.exceptions;
+package domain.exceptions;
 
 public class TicInvalidFormatException extends Exception{
 
