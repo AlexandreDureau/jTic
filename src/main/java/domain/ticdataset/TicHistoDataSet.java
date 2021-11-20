@@ -1,11 +1,10 @@
 package domain.ticdataset;
 
+import computing.Sum;
 import domain.exceptions.TicChecksumException;
 import domain.exceptions.TicInvalidFormatException;
-
 import java.time.LocalDateTime;
-
-import static domain.toolbox.compute.Sum.sumBytes;
+import computing.Sum.*;
 
 public class TicHistoDataSet extends TicDataSet{
 
@@ -37,17 +36,17 @@ public class TicHistoDataSet extends TicDataSet{
             int sum=0;
 
             // Ajout des octets du label
-            sum += sumBytes(label);
+            sum += Sum.sumBytesOnByte(label);
 
             // Ajout des octets du timestamp
             if(null != timestamp){
                 sum += SEP_CHAR;
-                sum += sumBytes(timestamp.get());
+                sum += Sum.sumBytesOnByte(timestamp.get());
             }
 
             // Ajout des octets de la valeur
             sum += SEP_CHAR;
-            sum += sumBytes(value);
+            sum += Sum.sumBytesOnByte(value);
 
             return (byte)((sum & 0x3F) + 0x20);
         }

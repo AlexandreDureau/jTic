@@ -1,10 +1,10 @@
 package domain.ticframe;
 
+import arrays.ByteArray;
 import domain.exceptions.TicChecksumException;
 import domain.exceptions.TicInvalidFormatException;
 import domain.ticdataset.TicDataSet;
 import domain.ticdataset.TicHistoDataSet;
-import domain.toolbox.array.src.ByteArray;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -114,7 +114,6 @@ public class TicHistoFrame implements TicFrame{
 
         bytes = ByteArray.append(bytes,startOfFrame);
         for(TicDataSet dataSet : dataSetList){
-
             bytes = ByteArray.append(bytes,dataSet.getBytes());
         }
         bytes = ByteArray.append(bytes,endOfFrame);

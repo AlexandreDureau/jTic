@@ -1,5 +1,7 @@
 package domain.ticdataset;
 
+import computing.Sum;
+
 public class TicStandardDataSet extends TicDataSet{
 
     @Override
@@ -9,26 +11,17 @@ public class TicStandardDataSet extends TicDataSet{
             int sum=0;
 
             // Ajout des octets du label
-            byte[] label_bytes = label.getBytes();
-            for (byte character : label_bytes) {
-                sum += character;
-            }
+            sum += Sum.sumBytesOnByte(label);
 
             // Ajout des octets du timestamp
             if(null != timestamp){
                 sum += SEP_CHAR;
-                byte[] timestamp_bytes = timestamp.get().getBytes();
-                for (byte character : timestamp_bytes) {
-                    sum += character;
-                }
+                sum += Sum.sumBytesOnByte(timestamp.get());
             }
 
             // Ajout des octets de la valeur
             sum += SEP_CHAR;
-            byte[] value_bytes = value.getBytes();
-            for (byte character : value_bytes) {
-                sum += character;
-            }
+            sum += Sum.sumBytesOnByte(value);
 
             // Ajout du séparateur entre la valeur et le checksum
             sum += SEP_CHAR;
