@@ -1,4 +1,4 @@
 package domain.exceptions;
 
-public class TicChecksumException extends Exception{
+public class TicChecksumException extends TicException{
 }

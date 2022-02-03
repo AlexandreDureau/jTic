@@ -1,11 +1,12 @@
 package domain.ticdataset;
 
+import arrays.ByteArray;
 import computing.Sum;
 
 public class TicStandardDataSet extends TicDataSet{
 
     @Override
-    protected Byte computeChecksum() {
+    public Byte computeChecksum() {
 
         if(null != label && null != value){
             int sum=0;
@@ -31,11 +32,6 @@ public class TicStandardDataSet extends TicDataSet{
         else{
             return null;
         }
-    }
-
-    @Override
-    public byte[] getBytes() {
-        return new byte[0];
     }
 
     @Override

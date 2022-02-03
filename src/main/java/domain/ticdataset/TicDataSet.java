@@ -1,10 +1,15 @@
 package domain.ticdataset;
 
+import arrays.ByteArray;
 import domain.TicTimestamp;
 import domain.exceptions.TicChecksumException;
 import domain.exceptions.TicInvalidFormatException;
-import domain.ticframe.TicFrame;
+
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+
+import static constants.Constants.TIC_DATASET_START_KEY;
+import static constants.Constants.TIC_DATASET_STOP_KEY;
 
 public abstract class TicDataSet {
 
@@ -12,14 +17,14 @@ public abstract class TicDataSet {
     public static final Byte COMPUTE_CHECKSUM = null;
 
     // Attributs
-    protected TicFrame frame;
     protected String label;
     protected String value;
     protected TicTimestamp timestamp = null; // Optionnel;
     protected Byte checksum;
     protected byte FIRST_PRINTABLE_CHAR = 0x21;
     protected byte LAST_PRINTABLE_CHAR  = 0x7E;
-    protected byte SEP_CHAR;
+    protected byte SEP_CHAR             = 0x20; // Espace
+
 
     public TicDataSet(){
         this.init();
@@ -31,13 +36,25 @@ public abstract class TicDataSet {
         this.label = label;
     }
 
+    public TicDataSet(ByteArray data) throws TicInvalidFormatException {
+
+        this.init();
+
+        if(!data.startsWith(TIC_DATASET_START_KEY)){
+            throw new TicInvalidFormatException("DataSet <" + data.toString() + "> should start with " + TIC_DATASET_START_KEY , 0);
+        }
+
+        if(!data.endsWith(TIC_DATASET_STOP_KEY)){
+            throw new TicInvalidFormatException("DataSet <" + data.toString() + "> should end with " + TIC_DATASET_STOP_KEY , data.size()-1);
+        }
+    }
 
     public TicDataSet(String label, String value) throws TicInvalidFormatException {
 
         this.init();
         setLabel(label);
         setValue(value);
-        computeChecksum();
+        this.checksum = computeChecksum();
     }
 
 
@@ -100,7 +117,7 @@ public abstract class TicDataSet {
     }
 
 
-    protected void setValue(String value) throws TicInvalidFormatException {
+    public void setValue(String value) throws TicInvalidFormatException {
 
         this.checkValidity(value);
         this.value = value;
@@ -125,7 +142,7 @@ public abstract class TicDataSet {
     }
 
 
-    protected abstract Byte computeChecksum();
+    public abstract Byte computeChecksum();
 
     public void verifyChecksum(Byte expectedChecksum) throws TicChecksumException{
         if(expectedChecksum!= null){
@@ -158,7 +175,42 @@ public abstract class TicDataSet {
 
     }
 
-    public abstract byte[] getBytes();
+    public byte[] getBytes(){
+
+        byte[] bytesArray = new byte[0];
+        bytesArray= ByteArray.s_append(bytesArray, TIC_DATASET_START_KEY);
+        bytesArray= ByteArray.s_append(bytesArray,label.getBytes());
+        bytesArray= ByteArray.s_append(bytesArray,SEP_CHAR);
+        if(null != timestamp){
+            bytesArray= ByteArray.s_append(bytesArray,timestamp.toString().getBytes());
+            bytesArray= ByteArray.s_append(bytesArray,SEP_CHAR);
+        }
+        bytesArray= ByteArray.s_append(bytesArray,value.getBytes());
+        bytesArray= ByteArray.s_append(bytesArray,SEP_CHAR);
+        bytesArray= ByteArray.s_append(bytesArray,checksum);
+
+        bytesArray= ByteArray.s_append(bytesArray,TIC_DATASET_STOP_KEY);
+        return bytesArray;
+    }
+
+    @Override
+    public String toString(){
+
+        String dataset_str = null;
+        try {
+            dataset_str = "<" + label + new String(new byte[]{SEP_CHAR}, "UTF-8");
+
+            if(timestamp != null){
+                dataset_str += timestamp.toString() + new String(new byte[] {SEP_CHAR}, "UTF-8");
+            }
+            dataset_str += value + new String(new byte[]{SEP_CHAR}, "UTF-8") + new String(new byte[]{checksum}, "UTF-8") + ">";
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return dataset_str;
+    }
 
     protected abstract void init();
 }

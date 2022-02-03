@@ -1,15 +1,12 @@
 package domain.exceptions;
 
-public class TicInvalidFormatException extends Exception{
+public class TicInvalidFormatException extends TicException{
 
-
-    protected String message;
-    public TicInvalidFormatException(String text, int index) {
-        this.message = "Tic element '"+ text + "' is invalid at char[" + index + "]";
+    public TicInvalidFormatException(String message) {
+        this.message = message;
     }
 
-    @Override
-    public String getMessage() {
-        return message;
+    public TicInvalidFormatException(String text, int index) {
+        this.message = "Tic element '"+ text + "' is invalid at char[" + index + "]";
     }
 }

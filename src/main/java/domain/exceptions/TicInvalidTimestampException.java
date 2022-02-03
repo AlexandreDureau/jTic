@@ -2,10 +2,8 @@ package domain.exceptions;
 
 import static domain.TicTimestamp.FORMAT;
 
-public class TicInvalidTimestampException extends Exception{
+public class TicInvalidTimestampException extends TicException{
 
-
-    protected String message;
     public TicInvalidTimestampException(String timestamp) {
         this.message = "Timestamp '"+ timestamp + "' is not valid : format should be " + FORMAT;
     }
@@ -13,8 +11,5 @@ public class TicInvalidTimestampException extends Exception{
     public TicInvalidTimestampException(String timestamp, Throwable cause) {
         this.message = "Timestamp '"+ timestamp + "' is not valid ( " + cause.getMessage() + "" ;
     }
-    @Override
-    public String getMessage() {
-        return message;
-    }
+
 }

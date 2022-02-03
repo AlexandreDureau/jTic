@@ -1,0 +1,5 @@
+{
+  "ticMode": "histo",
+  "type": "serial",
+  "portName": "COM7"
+}

@@ -1,8 +1,15 @@
 package domain;
 
+import domain.exceptions.TicInvalidFormatException;
 import domain.exceptions.TicInvalidTimestampException;
+
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static constants.Constants.VERIFY_TIMESTAMP;
 
 public class TicTimestamp {
 
@@ -11,6 +18,23 @@ public class TicTimestamp {
 
     public TicTimestamp(String time) throws TicInvalidTimestampException {
         this.set(time);
+    }
+
+    public TicTimestamp(byte[] bytes, int consistencyCheck) throws TicInvalidTimestampException, TicInvalidFormatException {
+
+        try {
+            String time_str = new String(bytes, "UTF-8");
+
+            if((consistencyCheck & VERIFY_TIMESTAMP) > 0){
+                this.set(time_str);
+            }
+            else{
+                this.time = time_str;
+            }
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new TicInvalidFormatException(e.getMessage(),-1);
+        }
     }
 
     public String get(){
@@ -73,7 +97,7 @@ public class TicTimestamp {
             this.time = "H" + AA + MM + JJ + hh + mm + ss;
         }
         else{
-            this.time = "S" + AA + MM + JJ + hh + mm + ss;
+            this.time = "E" + AA + MM + JJ + hh + mm + ss;
         }
     }
 

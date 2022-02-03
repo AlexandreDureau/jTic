@@ -2,9 +2,6 @@ package domain.ticdataset;
 
 import domain.exceptions.TicChecksumException;
 import domain.exceptions.TicInvalidFormatException;
-import domain.ticdataset.TicDataSet;
-import domain.ticdataset.TicHistoDataSet;
-import domain.ticdataset.TicStandardDataSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
