@@ -14,15 +14,16 @@ import java.util.List;
 
 import static constants.Constants.TIC_FRAME_START_KEY;
 import static constants.Constants.TIC_FRAME_STOP_KEY;
+import static infra.channels.serial.TicSerialPortConstants.*;
 
 public class TicSerialPortRxChannel extends TicRxChannel {
 
     String portName = "";
     SerialPort serialPort;
-    int baudRate = 9600;
-    int dataBits = 7;
-    int stopBits = 1;
-    int parity = SerialPort.NO_PARITY;
+    int baudRate;
+    int dataBits;
+    int stopBits;
+    int parity;
 
     public TicSerialPortRxChannel(TicRxChannelListener listener) {
         super(listener);
@@ -112,16 +113,16 @@ public class TicSerialPortRxChannel extends TicRxChannel {
         this.ticMode = ticMode;
         switch(ticMode){
             case HISTO:
-                this.baudRate = 1200;
-                this.dataBits = 7;
-                this.stopBits = 1;
-                this.parity = SerialPort.EVEN_PARITY;
+                this.baudRate = TIC_HISTO_BAUDRATE;
+                this.dataBits = TIC_HISTO_DATABITS;
+                this.stopBits = TIC_HISTO_STOPBITS;
+                this.parity   = TIC_HISTO_PARITY;
                 break;
             case STANDARD:
-                this.baudRate = 9600;
-                this.dataBits = 7;
-                this.stopBits = 1;
-                this.parity = SerialPort.EVEN_PARITY;
+                this.baudRate = TIC_STANDARD_BAUDRATE;
+                this.dataBits = TIC_STANDARD_DATABITS;
+                this.stopBits = TIC_STANDARD_STOPBITS;
+                this.parity   = TIC_STANDARD_PARITY;
                 break;
             default         : throw new TicInvalidConfigException("ticMode " + ticMode + " is not handled");
         }
@@ -132,7 +133,7 @@ public class TicSerialPortRxChannel extends TicRxChannel {
 
         accumulator.append(buffer);
 
-        List<ByteArray> ticDataSegments = accumulator.split(TIC_FRAME_START_KEY, TIC_FRAME_STOP_KEY, true, -1);
+        List<ByteArray> ticDataSegments = accumulator.split(TIC_FRAME_START_KEY, TIC_FRAME_STOP_KEY, -1);
 
         if(!ticDataSegments.isEmpty()){
 

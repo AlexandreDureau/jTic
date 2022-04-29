@@ -133,8 +133,12 @@ public class TicHistoDataSet extends TicDataSet{
         if(bytes.length == 1) {
             this.checksum = bytes[0];
         }
+        else if(bytes.length == 0) {
+            // Checksum value can be 0x20 (SPACE) which is the same character than SEP for Historic Tic.
+            this.checksum = 0x20;
+        }
         else {
-            throw new TicInvalidFormatException("Checksum should be one single byte",-1);
+            throw new TicInvalidFormatException("Checksum should be one single byte and not : [" + new ByteArray(bytes).toString(16) + "]");
         }
     }
 }

@@ -11,6 +11,5 @@ public interface TicService {
     void start() throws IOException;
     void stop() throws IOException;
     void set(Object config) throws TicInvalidConfigException;
-    //void setTicChannel(TicChannel channel) throws TicInvalidConfigException;
 }
 

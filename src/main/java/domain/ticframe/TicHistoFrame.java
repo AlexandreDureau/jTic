@@ -20,7 +20,10 @@ public class TicHistoFrame extends TicFrameBase{
 
     public TicHistoFrame(ByteArray data, int consistencyCheck) throws TicException {
         super(data);
-        List<ByteArray> parts = data.split(TIC_DATASET_START_KEY,TIC_DATASET_STOP_KEY, true, -1);
+        data.removeFirst(TIC_FRAME_START_KEY, 1);
+        data.removeLast(TIC_FRAME_STOP_KEY, 1);
+
+        List<ByteArray> parts = data.extract(TIC_DATASET_START_KEY, TIC_DATASET_STOP_KEY, true, -1);
 
         for (ByteArray part : parts) {
             this.addDataSet(new TicHistoDataSet(part, consistencyCheck));

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import types.TicMode;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,13 +27,15 @@ public class TicFileRxChannel extends TicRxChannel {
     public static final int MAX_TIC_STANDARD_FRAME_READING_SPEED  = 9600 / 10;
     public static final int DFLT_TIC_HISTO_FRAME_READING_SPEED    = 1200 / 10;
     public static final int DFLT_TIC_STANDARD_FRAME_READING_SPEED = 9600 / 10;
+    public  static final int DFLT_LOOP = 1;
 
-    String filePath;
-    int readingSpeed = 1000; // nb chars per second
-    int interFrameDelay = 100; // miliseconds
-    int loop;
-
-
+    private String filePath;
+    private int baudrate = -1;
+    private int interFrameDelay = 100; // miliseconds
+    private int loop = DFLT_LOOP;
+    private int loopIterator;
+    private byte[] accumulatorDummy = new byte[0];
+    private BufferedReader reader;
     public TicFileRxChannel(TicRxChannelListener listener) {
         super(listener);
     }
@@ -52,25 +55,38 @@ public class TicFileRxChannel extends TicRxChannel {
 
     @Override
     public void start() throws IOException {
-
-        System.out.println("filePath : " + filePath);
-        FileReader fileReader = new FileReader(filePath);
-        BufferedReader reader = new BufferedReader(fileReader);
-        int nbChars = 20;
+        FileInputStream  fileReader = new FileInputStream (filePath);
+        reader = new BufferedReader(new InputStreamReader(fileReader));
+        int currentBaudrate = getBaudrate();
+        int sleepTime = 20;
+        int nbCharsToReadPerCycle = currentBaudrate / (1000/sleepTime);
+        loopIterator = 0;
         char[] readBuffer = new char[512];
+
         this.rxProcess = new Thread(new Runnable() {
             @Override
             public synchronized void run() {
                 try {
+                    accumulator.clear();
                     isStarted = true;
                     while (isStarted) {
 
-                        int nbReadChars = reader.read(readBuffer,0,nbChars);
+                        int nbReadChars = reader.read(readBuffer,0,nbCharsToReadPerCycle);
 
                         if (nbReadChars > 0) {
+                            handleBeginningOfData();
                             accumulate(Arrays.copyOf(readBuffer, nbReadChars));
                         }
-                        Thread.sleep(20);
+                        else{
+                            handleEndOfData(sleepTime);
+
+                            loopIterator++;
+                            if((loop < 0) || (loopIterator < loop)){
+                                fileReader.getChannel().position(0);
+                            }
+                        }
+                        Thread.sleep(sleepTime);
+
                     }
                 } catch (Exception except) {
                     except.printStackTrace();
@@ -84,7 +100,8 @@ public class TicFileRxChannel extends TicRxChannel {
 
     @Override
     public void stop() throws IOException {
-
+        isStarted = false;
+        reader.close();
     }
 
 
@@ -95,6 +112,7 @@ public class TicFileRxChannel extends TicRxChannel {
         String filePath     = new File("").getAbsolutePath() + File.separator +  getStringParameter(config, "path", true, "");
         int readingSpeed    = getIntParameter(config, "readingSpeed", false, getMinReadingSpeed(), getMaxReadingSpeed() , getDefaultReadingSpeed());
         int interFrameDelay = getIntParameter(config, "interFrameDelay", false, 0, Integer.MAX_VALUE, 1000);
+        loop                = getIntParameter(config, "repeat", false, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
 
         if((!ticMode.equals(this.ticMode)) || (!filePath.equals(this.filePath))){
             this.ticMode = ticMode;
@@ -165,37 +183,60 @@ public class TicFileRxChannel extends TicRxChannel {
 
     protected void accumulate(char[] buffer){
 
-        accumulator.append(ByteArray.toBytes(buffer));
+        byte[] bytes_buffer = ByteArray.toBytes(buffer);
+        accumulator.append(bytes_buffer);
+        List<ByteArray> ticDataSegmentList = accumulator.split(TIC_FRAME_START_KEY, TIC_FRAME_STOP_KEY, -1);
 
-        List<ByteArray> ticDataSegments = accumulator.split(TIC_FRAME_START, TIC_FRAME_END, true, -1);
-        //System.out.println("accumulator = <" + accumulator.toString(16) + ">");
+        if(!ticDataSegmentList.isEmpty()){
+            handleTicFrames(ticDataSegmentList);
+            updateAccumulator(ticDataSegmentList);
+        }
+    }
 
-        //System.out.println("ticDataSegments length = " + ticDataSegments.size());
-        if(!ticDataSegments.isEmpty()){
-            ByteArray lastTicDataSegment = ticDataSegments.get(ticDataSegments.size() -1);
-            if(lastTicDataSegment.endsWith(TIC_FRAME_END)){
 
-                accumulator.clear();
-                for(ByteArray ticDataSegment : ticDataSegments){
-                    refactoTicDataSegment(ticDataSegment);
-                    this.ticDataQueue.push(ticDataSegment);
-                }
-            }
-            else{
-                accumulator = lastTicDataSegment;
-                for(ByteArray ticDataSegment : ticDataSegments){
-                    if(ticDataSegment != lastTicDataSegment){
-                        this.ticDataQueue.push(ticDataSegment);
-                    }
-                }
+    private void handleTicFrames(List<ByteArray> ticDataSegmentList) {
+        for(ByteArray ticDataSegment : ticDataSegmentList){
+            if(ticDataSegment.startsWith(TIC_FRAME_START_KEY) && ticDataSegment.endsWith(TIC_FRAME_STOP_KEY)){
+                refactoTicDataSegment(ticDataSegment);
+                this.ticDataQueue.push(ticDataSegment);
             }
         }
     }
+
+
+    private void updateAccumulator(List<ByteArray> ticDataSegmentList){
+        ByteArray lastTicDataSegment = ticDataSegmentList.get(ticDataSegmentList.size() -1);
+
+        if(lastTicDataSegment.startsWith(TIC_FRAME_START_KEY) && lastTicDataSegment.endsWith(TIC_FRAME_STOP_KEY)){
+            accumulator.clear();
+        }
+        else{
+            accumulator = lastTicDataSegment;
+        }
+    }
+
 
     private void refactoTicDataSegment(ByteArray ticDataSegment){
         ticDataSegment.removeFirst(TIC_FRAME_START, 1);
         ticDataSegment.removeLast(TIC_FRAME_END, 1);
         ticDataSegment.insert(0, TIC_FRAME_START_KEY);
         ticDataSegment.append(TIC_FRAME_STOP_KEY);
+    }
+
+
+    public int getBaudrate(){
+        int computedBaudrate;
+        if(baudrate == -1){
+            switch (ticMode){
+                case HISTO   : computedBaudrate = 1200; break;
+                case STANDARD:
+                default      : computedBaudrate = 9600;
+            }
+        }
+        else{
+            computedBaudrate = baudrate;
+        }
+
+        return computedBaudrate;
     }
 }

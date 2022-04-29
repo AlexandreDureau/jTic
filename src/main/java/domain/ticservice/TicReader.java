@@ -4,6 +4,7 @@ import arrays.ByteArray;
 import domain.exceptions.TicException;
 import domain.exceptions.TicInvalidConfigException;
 import domain.ticframe.TicHistoFrame;
+import infra.channels.TicChannel;
 import infra.channels.TicRxChannelFactory;
 import infra.channels.TicRxChannel;
 import infra.channels.TicRxChannelListener;
@@ -57,7 +58,7 @@ public class TicReader extends AbstractTicService implements TicService, TicRxCh
                             TicHistoFrame ticFrame = new TicHistoFrame(data, consistencyChecks);
 
                             if(null != this.listener){
-                                this.listener.onReceivedFrame(ticFrame);
+                                this.listener.onReceivedFrame(this, ticFrame);
                             }
                         } catch (TicException e) {
                             e.printStackTrace();
@@ -97,6 +98,48 @@ public class TicReader extends AbstractTicService implements TicService, TicRxCh
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public void onDataBeginning(TicChannel channel) {
+        if(null != listener){
+            listener.onDataBeginning(this);
+        }
+    }
+
+    @Override
+    public void onDataEnd(TicChannel channel) {
+        if(null != listener){
+            listener.onDataEnd(this);
+        }
+    }
+
+    @Override
+    public void onFrameBeginning(TicChannel channel) {
+        if(null != listener){
+            listener.onFrameBeginning(this);
+        }
+    }
+
+    @Override
+    public void onFrameEnd(TicChannel channel) {
+        if(null != listener){
+            listener.onFrameEnd(this);
+        }
+    }
+
+    @Override
+    public void onChannelStarted(TicChannel channel) {
+        if(null != listener){
+            listener.onChannelStarted(this);
+        }
+    }
+
+    @Override
+    public void onChannelStopped(TicChannel channel) {
+        if(null != listener){
+            listener.onChannelStopped(this);
         }
     }
 }
