@@ -1,5 +1,5 @@
 {
   "ticMode": "histo",
   "type": "file",
-  "path": "./src/test/resources/domain/ticservice/ticreader/file/input/ticFrameHistoric.txt",
+  "path": "./src/test/resources/domain/ticservice/ticreader/file/input/ticFrameHistoric.txt"
 }
