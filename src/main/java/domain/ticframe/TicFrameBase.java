@@ -4,8 +4,7 @@ import arrays.ByteArray;
 import domain.exceptions.TicInvalidFormatException;
 import domain.ticdataset.TicDataSet;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import static constants.Constants.TIC_FRAME_START_KEY;
 import static constants.Constants.TIC_FRAME_STOP_KEY;
@@ -61,16 +60,12 @@ public abstract class TicFrameBase implements TicFrame{
     @Override
     public String toText(){
 
-        StringBuilder text = new StringBuilder();
-        try {
+        StringBuilder text = new StringBuilder("<STX>");
 
-            for(TicDataSet dataset : this.getDataSetList()){
-                text.append(new String(dataset.getBytes(), "UTF-8"));
-            }
+        for(TicDataSet dataset : this.getDataSetList()){
+            text.append(new String(dataset.getBytes(), StandardCharsets.UTF_8));
         }
-        catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        text.append("<ETX>");
 
         return text.toString();
     }

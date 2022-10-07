@@ -374,10 +374,10 @@ public class TicHistoFrameTest extends TicFrameTest{
 
         // Then:
         String expectedTicHistoFrameTxt =
-                new String(new byte[]{2}, "UTF-8")+
+                new String("<STX>")+
                 "\n" + "BASE 000000095 Y" + "\r" +
                 "\n" + "PAPP 00000 !" + "\r" +
-                "\n" + "OPTARIF BASE 0" + "\r" + new String(new byte[]{3}, "UTF-8");
+                "\n" + "OPTARIF BASE 0" + "\r" + new String("<ETX>");
 
         Assertions.assertEquals(expectedTicHistoFrameTxt, ticHistoFrameTxt);
     }
